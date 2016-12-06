@@ -178,7 +178,7 @@ sed -i '/^TOOL_CHAIN_TAG/d' Conf/target.txt
 sed -i '/^MAX_CONCURRENT_THREAD_NUMBER/d' Conf/target.txt
 
 ACTIVE_PLATFORM=$PLATFORM_PACKAGE/PlatformPkgGcc"$Arch".dsc
-TOOL_CHAIN_TAG=GCC46
+TOOL_CHAIN_TAG=GCC48
 MAX_CONCURRENT_THREAD_NUMBER=1
 echo ACTIVE_PLATFORM = $ACTIVE_PLATFORM                           >> Conf/target.txt
 echo TARGET          = $TARGET                                    >> Conf/target.txt
