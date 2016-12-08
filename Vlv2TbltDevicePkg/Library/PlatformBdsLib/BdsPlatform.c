@@ -1261,7 +1261,7 @@ PlatformBdsLibEnumerateAllBootOption (
       // Assume a removable SATA device should be the DVD/CD device, a fixed SATA device should be the Hard Drive device.
       //
       case BDS_EFI_MESSAGE_ATAPI_BOOT:
-      case BDS_EFI_MESSAGE_SATA_BOOT:
+      case BDS_EFI_MESSAGE_SATA_BOOT://硬盘
         if (BlkIo->Media->RemovableMedia) {
           if (CdromNumber != 0) {
             UnicodeSPrint (Buffer, sizeof (Buffer), L"%s %d", BdsLibGetStringById (STRING_TOKEN (STR_DESCRIPTION_CD_DVD)), CdromNumber);
@@ -1281,7 +1281,7 @@ PlatformBdsLibEnumerateAllBootOption (
         BdsLibBuildOptionFromHandle (BlockIoHandles[Index], BdsBootOptionList, Buffer);
         break;
 
-      case BDS_EFI_MESSAGE_USB_DEVICE_BOOT:
+      case BDS_EFI_MESSAGE_USB_DEVICE_BOOT://USB
         if (UsbNumber != 0) {
           UnicodeSPrint (Buffer, sizeof (Buffer), L"%s %d", BdsLibGetStringById (STRING_TOKEN (STR_DESCRIPTION_USB)), UsbNumber);
         } else {
@@ -1291,7 +1291,7 @@ PlatformBdsLibEnumerateAllBootOption (
         UsbNumber++;
         break;
 
-      case BDS_EFI_MESSAGE_SCSI_BOOT:
+      case BDS_EFI_MESSAGE_SCSI_BOOT://小型计算机系统接口
         if (ScsiNumber != 0) {
           UnicodeSPrint (Buffer, sizeof (Buffer), L"%s %d", BdsLibGetStringById (STRING_TOKEN (STR_DESCRIPTION_SCSI)), ScsiNumber);
         } else {
@@ -1301,7 +1301,7 @@ PlatformBdsLibEnumerateAllBootOption (
         ScsiNumber++;
         break;
 
-      case BDS_EFI_MESSAGE_MISC_BOOT:
+      case BDS_EFI_MESSAGE_MISC_BOOT://
       default:
         if (MiscNumber != 0) {
           UnicodeSPrint (Buffer, sizeof (Buffer), L"%s %d", BdsLibGetStringById (STRING_TOKEN (STR_DESCRIPTION_MISC)), MiscNumber);
@@ -1688,7 +1688,7 @@ PlatformBdsPolicyBehavior (
 
   //
   // Load the driver option as the driver option list
-  //
+  // 将驱动程序选项加载为驱动程序选项列表
   PlatformBdsGetDriverOption (DriverOptionList);
 
   //
@@ -1729,7 +1729,7 @@ PlatformBdsPolicyBehavior (
 
   //
   // No deferred images exist by default
-  //
+  //默认情况下不存在延迟图像
   DeferredImageExist = FALSE;
   if ((BootMode != BOOT_WITH_MINIMAL_CONFIGURATION) && (PcdGet32(PcdFlashFvShellSize) > 0)){
     gDS->ProcessFirmwareVolume (
@@ -1778,21 +1778,21 @@ PlatformBdsPolicyBehavior (
     }
   }
 
-  Status = gBS->LocateProtocol(&gEsrtManagementProtocolGuid, NULL, (VOID **)&EsrtManagement);
+  Status = gBS->LocateProtocol(&gEsrtManagementProtocolGuid, NULL, (VOID **)&EsrtManagement);//找出系统中指定protocol的所有实例
   if (EFI_ERROR(Status)) {
     EsrtManagement = NULL;
   }
 
   switch (BootMode) {
 
-  case BOOT_WITH_MINIMAL_CONFIGURATION:
-    PlatformBdsInitHotKeyEvent ();
-    PlatformBdsConnectSimpleConsole (gPlatformSimpleConsole);
+  case BOOT_WITH_MINIMAL_CONFIGURATION://启动最小配置
+    PlatformBdsInitHotKeyEvent ();  //初始化热键
+    PlatformBdsConnectSimpleConsole (gPlatformSimpleConsole);//预定义平台控制台设备路径
 
 
     //
     // Check to see if it's needed to dispatch more DXE drivers.
-    //
+    //DXE是设备初始化的主要环节，它提供了设备驱动和协议接口环境界面。
     for (Index = 0; Index < sizeof(ConnectDriverTable)/sizeof(EFI_GUID *); Index++) {
       Status = gBS->LocateHandleBuffer (
                       ByProtocol,
@@ -1834,7 +1834,7 @@ PlatformBdsPolicyBehavior (
 
     //
     // Connect boot device here to give time to read keyboard.
-    //
+    //连接启动设备在这里给时间读键盘
     BdsLibConnectDevicePath (gPlatformSimpleBootOption[0]);
 
     //
@@ -1854,7 +1854,7 @@ PlatformBdsPolicyBehavior (
     if (mHotKeyPressed) {
       //
       // Skip show progress count down
-      //
+      //跳过显示进程
       Timeout = 0xFFFF;
       goto FULL_CONFIGURATION;
     }
@@ -1884,7 +1884,7 @@ PlatformBdsPolicyBehavior (
     BootIntoFirmwareInterface();
     break;
 
-  case BOOT_ASSUMING_NO_CONFIGURATION_CHANGES:
+  case BOOT_ASSUMING_NO_CONFIGURATION_CHANGES://假设启动没有改变
 
     //
     // In no-configuration boot mode, we can connect the
@@ -1907,7 +1907,7 @@ PlatformBdsPolicyBehavior (
         //
         // After user authentication, the deferred drivers was loaded again.
         // Here, need to ensure the deferred images are connected.
-        //
+        //在用户认证后，延迟的驱动程序再次加载。这里，需要确保延迟的图像连接。
         BdsLibConnectAllDefaultConsoles ();
         PlatformBdsConnectSequence ();
       }
@@ -2018,7 +2018,7 @@ FULL_CONFIGURATION:
 
     //
     // Connect platform console
-    //
+    //连接平台控制台
     Status = PlatformBdsConnectConsole (gPlatformConsole);
     if (EFI_ERROR (Status)) {
 
@@ -2031,7 +2031,7 @@ FULL_CONFIGURATION:
     //
     // Chenyunh[TODO]: This is Workgroud to show the fs for uSDcard,
     // Need to root cause this issue.
-    //
+    //?
     DEBUG ((DEBUG_ERROR, "Start to reconnect all driver.\n"));
     BdsLibDisconnectAllEfi();
     BdsLibConnectAll ();
@@ -2054,7 +2054,7 @@ FULL_CONFIGURATION:
 
     //
     // Perform user identification
-    //
+    //执行用户识别
     if (mCurrentUser == NULL) {
       PlatformBdsUserIdentify (&mCurrentUser, &DeferredImageExist);
       if (DeferredImageExist) {
@@ -2082,7 +2082,7 @@ FULL_CONFIGURATION:
 
     //
     // Here we have enough time to do the enumeration of boot device
-    //
+    //枚举设备
     PlatformBdsLibEnumerateAllBootOption (BootOptionList);
 
     //
@@ -3041,7 +3041,7 @@ HitHotkeyEvent (
   if (EFI_ERROR (Status)) {
     return;
   }
-  Status = gBS->SetTimer (
+  Status = gBS->SetTimer (              /*设置定时器属性*/
                   mHotKeyTimerEvent,
                   TimerPeriodic,
                   KEYBOARD_TIMER_INTERVAL
@@ -3060,24 +3060,24 @@ PlatformBdsInitHotKeyEvent (
   VOID
   )
 {
-  EFI_STATUS      Status;
+  EFI_STATUS      Status;//无符号长整数
 
   //
   // Register Protocol notify for Hotkey service
   //
-  Status = gBS->CreateEvent (
+  Status = gBS->CreateEvent (       /*生成一个事件对象*/
                   EVT_NOTIFY_SIGNAL,
                   TPL_CALLBACK,
                   HitHotkeyEvent,
                   NULL,
-                  &mHitHotkeyEvent
+                  &mHitHotkeyEvent  /*将事件的对象赋值给mHitHotkeyEvent*/
                   );
   ASSERT_EFI_ERROR (Status);
 
   //
   // Register for protocol notifications on this event
   //
-  Status = gBS->RegisterProtocolNotify (
+  Status = gBS->RegisterProtocolNotify (                /*为指定的protocol注册通知事件.当这个protocol安装时,该事件触发*/
                   &gEfiSimpleTextInputExProtocolGuid,
                   mHitHotkeyEvent,
                   &mHitHotkeyRegistration
