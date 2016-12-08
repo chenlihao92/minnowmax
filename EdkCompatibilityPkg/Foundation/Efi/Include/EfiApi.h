@@ -182,9 +182,9 @@ EFI_STATUS
   );
 
 typedef enum {
-  TimerCancel,
-  TimerPeriodic,
-  TimerRelative,
+  TimerCancel,      /*取消触发*/
+  TimerPeriodic,    /*周期触发*/
+  TimerRelative,    /*相对触发*/
   TimerTypeMax
 } EFI_TIMER_DELAY;
 
